@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         APM Master - Custom Theme Overlays
 // @namespace    local.apm.theme-overlays
-// @version      1.0.1
+// @version      1.0.2
 // @description  Adds custom overlay themes to APM Master
 // @match        https://*.eam.hxgnsmartcloud.com/*
 // @match        https://*.eam.aws.a2z.com/*
@@ -279,8 +279,8 @@ html[data-apm-loader="pink-bolt"] .center-lightning {
    Completely replaces APM loader contents
    ============================ */
 
-html[data-apm-loader="Pink Elmo gif"] #processing-request-container,
-html[data-apm-loader="Pink Elmo gif"] .x-mask-msg {
+html[data-apm-loader="pink-elmo-gif"] #processing-request-container,
+html[data-apm-loader="pink-elmo-gif"] .x-mask-msg {
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
@@ -291,17 +291,17 @@ html[data-apm-loader="Pink Elmo gif"] .x-mask-msg {
 }
 
 /* Hide everything APM puts inside the loader */
-html[data-apm-loader="Pink Elmo gif"] #processing-request-container *,
-html[data-apm-loader="Pink Elmo gif"] .x-mask-msg * {
+html[data-apm-loader="pink-elmo-gif"] #processing-request-container *,
+html[data-apm-loader="pink-elmo-gif"] .x-mask-msg * {
   display: none !important;
   visibility: hidden !important;
   opacity: 0 !important;
 }
 
 /* Hide APM thunder/bolt overlay too */
-html[data-apm-loader="Pink Elmo gif"] .center-lightning,
-html[data-apm-loader="Pink Elmo gif"] .thunder-overlay,
-html[data-apm-loader="Pink Elmo gif"] .lightning-bolt {
+html[data-apm-loader="pink-elmo-gif"] .center-lightning,
+html[data-apm-loader="pink-elmo-gif"] .thunder-overlay,
+html[data-apm-loader="pink-elmo-gif"] .lightning-bolt {
   display: none !important;
   visibility: hidden !important;
   opacity: 0 !important;
@@ -309,8 +309,8 @@ html[data-apm-loader="Pink Elmo gif"] .lightning-bolt {
 }
 
 /* Show only the GIF */
-html[data-apm-loader="Pink Elmo gif"] #processing-request-container::before,
-html[data-apm-loader="Pink Elmo gif"] .x-mask-msg::before {
+html[data-apm-loader="pink-elmo-gif"] #processing-request-container::before,
+html[data-apm-loader="pink-elmo-gif"] .x-mask-msg::before {
   content: "";
   display: block;
   width: 360px;
@@ -327,8 +327,8 @@ html[data-apm-loader="Pink Elmo gif"] .x-mask-msg::before {
    Completely replaces APM loader contents
    ============================ */
 
-html[data-apm-loader="Elmo Fire gif"] #processing-request-container,
-html[data-apm-loader="Elmo Fire gif"] .x-mask-msg {
+html[data-apm-loader="elmo-fire-gif"] #processing-request-container,
+html[data-apm-loader="elmo-fire-gif"] .x-mask-msg {
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
@@ -339,17 +339,17 @@ html[data-apm-loader="Elmo Fire gif"] .x-mask-msg {
 }
 
 /* Hide everything APM puts inside the loader */
-html[data-apm-loader="Elmo Fire gif"] #processing-request-container *,
-html[data-apm-loader="Elmo Fire gif"] .x-mask-msg * {
+html[data-apm-loader="elmo-fire-gif"] #processing-request-container *,
+html[data-apm-loader="elmo-fire-gif"] .x-mask-msg * {
   display: none !important;
   visibility: hidden !important;
   opacity: 0 !important;
 }
 
 /* Hide APM thunder/bolt overlay too */
-html[data-apm-loader="Elmo Fire gif"] .center-lightning,
-html[data-apm-loader="Elmo Fire gif"] .thunder-overlay,
-html[data-apm-loader="Elmo Fire gif"] .lightning-bolt {
+html[data-apm-loader="elmo-fire-gif"] .center-lightning,
+html[data-apm-loader="elmo-fire-gif"] .thunder-overlay,
+html[data-apm-loader="elmo-fire-gif"] .lightning-bolt {
   display: none !important;
   visibility: hidden !important;
   opacity: 0 !important;
@@ -357,8 +357,8 @@ html[data-apm-loader="Elmo Fire gif"] .lightning-bolt {
 }
 
 /* Show only the GIF */
-html[data-apm-loader="Elmo Fire gif"] #processing-request-container::before,
-html[data-apm-loader="Elmo Fire gif"] .x-mask-msg::before {
+html[data-apm-loader="elmo-fire-gif"] #processing-request-container::before,
+html[data-apm-loader="elmo-fire-gif"] .x-mask-msg::before {
   content: "";
   display: block;
   width: 360px;
