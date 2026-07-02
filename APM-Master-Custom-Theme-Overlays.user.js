@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         APM Master - Custom Theme Overlays
 // @namespace    local.apm.theme-overlays
-// @version      1.0.4
+// @version      1.0.5
 // @description  Adds custom overlay themes to APM Master
 // @match        https://*.eam.hxgnsmartcloud.com/*
 // @match        https://*.eam.aws.a2z.com/*
@@ -50,11 +50,13 @@
 
   const UPDATE_AVAILABLE_KEY = "apm_custom_theme_update_available";
   const UPDATE_VERSION_KEY = "apm_custom_theme_update_version";
+  const UPDATE_STATUS_KEY = "apm_custom_theme_update_status";
 
   function compareVersions(remote, local) {
     const parse = (value) =>
       String(value)
-        .trim.split(/[+-]/)[0]
+        .trim()
+        .split(/[+-]/)[0]
         .split(".")
         .map((part) => parseInt(part, 10) || 0);
 
@@ -73,48 +75,104 @@
   }
 
   function getVersionFromScriptHeader(scriptText) {
-    const match = scriptText.match(/@version\s+([^\s]+)/);
+    const match = scriptText.match(/\/\/\s*@version\s+([^\s]+)/);
     return match ? match[1] : null;
   }
 
-  function checkForAddonUpdates() {
+  function setUpdateStatus(message, type = "idle") {
+    GM_setValue(UPDATE_STATUS_KEY, message);
+
+    const status = document.querySelector("#apm-custom-update-status");
+    const button = document.querySelector("#apm-custom-update-row button");
+
+    if (status) {
+      status.textContent = message;
+      status.style.color =
+        type === "error"
+          ? "#ff4d4d"
+          : type === "current"
+            ? "#4dff4d"
+            : type === "available"
+              ? "#ff7b00"
+              : "#d783ff";
+    }
+
+    if (button) {
+      button.textContent =
+        type === "available" ? "Update Now" : "Check for Updates";
+      button.dataset.updateAvailable = type === "available" ? "true" : "false";
+    }
+  }
+
+  function checkForAddonUpdates(force = false) {
+    setUpdateStatus("Checking for updates...", "idle");
+
+    const lastChecked = GM_getValue("apm_custom_theme_last_update_check", 0);
+    const now = Date.now();
+    const oneHour = 1000 * 60 * 60;
+
+    if (!force && now - lastChecked < oneHour) {
+      const lastStatus = GM_getValue(
+        UPDATE_STATUS_KEY,
+        "Checked recently. Try again later.",
+      );
+      setUpdateStatus(lastStatus, "idle");
+      return;
+    }
+
     GM_xmlhttpRequest({
       method: "GET",
       url: `${SCRIPT_DOWNLOAD_URL}?cache_bust=${Date.now()}`,
       onload: function (response) {
-        if (response.status < 200 || response.status >= 300) return;
+        if (response.status < 200 || response.status >= 300) {
+          setUpdateStatus(
+            `Update check failed: HTTP ${response.status}`,
+            "error",
+          );
+          return;
+        }
 
         const remoteVersion = getVersionFromScriptHeader(response.responseText);
-        const localVersion = GM_info.script.version || "0.0.0";
+        const localVersion = GM_info?.script?.version || "0.0.0";
 
-        if (remoteVersion) return;
+        if (!remoteVersion) {
+          setUpdateStatus("Failed to read remote version.", "error");
+          return;
+        }
 
         const updateAvailable =
           compareVersions(remoteVersion, localVersion) > 0;
-        GM_setValue(UPDATE_AVAILABLE_KEY, updateAvailable);
-        GM_setValue(UPDATE_VERSION_KEY, remoteVersion);
 
-        renderUpdateButton();
+        GM_setValue(UPDATE_VERSION_KEY, remoteVersion);
+        GM_setValue(UPDATE_AVAILABLE_KEY, updateAvailable);
+        GM_setValue("apm_custom_theme_last_update_check", Date.now());
+
+        if (updateAvailable) {
+          setUpdateStatus(
+            `Update available: ${localVersion} → ${remoteVersion}`,
+            "available",
+          );
+        } else {
+          setUpdateStatus(`Up to date: ${localVersion}`, "current");
+        }
       },
+      onerror: function () {
+        setUpdateStatus("Failed to check for updates.", "error");
+      },
+    });
+  }
+
+  function openAddonUpdatePage() {
+    GM_openInTab(SCRIPT_DOWNLOAD_URL, {
+      active: true,
+      insert: true,
     });
   }
 
   function renderUpdateButton() {
     const loaderSelect = document.querySelector("#apm-custom-loader-select");
     if (!loaderSelect) return;
-
-    const existingButton = document.querySelector(
-      "#apm-custom-update-button-row",
-    );
-    const updateAvailable = GM_getValue(UPDATE_AVAILABLE_KEY, false);
-    const remoteVersion = GM_getValue(UPDATE_VERSION_KEY, "");
-
-    if (!updateAvailable) {
-      existingButton?.remove();
-      return;
-    }
-
-    if (existingButton) return;
+    if (document.querySelector("#apm-custom-update-row")) return;
 
     const row = document.createElement("div");
     row.id = "apm-custom-update-row";
@@ -126,31 +184,42 @@
 
     const label = document.createElement("div");
     label.innerHTML = `
-      <div style="font-weight:700;color:#ff7b00;">Update Available</div>
-      <div style="font-size:11px;color:#d783ff;">
-       Version ${remoteVersion} is available.</div>
-    `;
+    <div style="font-weight:700;color:#fff;">Addon Updates</div>
+    <div id="apm-custom-update-status" style="font-size:11px;color:#d783ff;">
+      ${GM_getValue(UPDATE_STATUS_KEY, "Manual update check available.")}
+    </div>
+  `;
 
     const button = document.createElement("button");
-    button.textContent = "Update Now";
+    button.id = "apm-custom-update-button";
+    button.textContent = GM_getValue(UPDATE_AVAILABLE_KEY, false)
+      ? "Update Now"
+      : "Check";
+    button.dataset.updateAvailable = GM_getValue(UPDATE_AVAILABLE_KEY, false)
+      ? "true"
+      : "false";
+
     button.style.padding = "5px 10px";
-    button.style.border = "6px";
+    button.style.borderRadius = "6px";
     button.style.border = "1px solid #ff7b00";
     button.style.background = "#222222";
     button.style.color = "#ffffff";
     button.style.fontWeight = "700";
+    button.style.cursor = "pointer";
 
     button.addEventListener("click", () => {
-      GM_openInTab(SCRIPT_DOWNLOAD_URL, {
-        active: true,
-        insert: true,
-      });
+      if (button.dataset.updateAvailable === "true") {
+        openAddonUpdatePage();
+        return;
+      }
+
+      checkForAddonUpdates(true);
     });
 
     row.appendChild(label);
     row.appendChild(button);
 
-    loaderSelect.parentElement.insertAdjacentElement("afterend", row);
+    loaderSelect.closest("div").insertAdjacentElement("afterend", row);
   }
 
   function applyLoader() {
@@ -560,8 +629,10 @@ html[data-apm-loader="elmo-fire-gif"] .x-mask-msg::before {
   }
 
   setInterval(addOverlayDropdown, 1000);
-  checkForAddonUpdates();
-  setInterval(checkForAddonUpdates, 1000 * 60 * 60); // Check for updates every hour
+  setInterval(renderUpdateButton, 1000);
+
+  setTimeout(() => checkForAddonUpdates(false), 3000);
+  setInterval(() => checkForAddonUpdates(false), 1000 * 60 * 60);
 
   unsafeWindow.clearNatalieTheme = function () {
     GM_setValue(OVERLAY_KEY, "none");
