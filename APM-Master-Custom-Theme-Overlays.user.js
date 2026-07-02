@@ -10,6 +10,10 @@
 // @grant        GM_getValue
 // @grant        GM_setValue
 // @grant        unsafeWindow
+// @updateURL    https://raw.githubusercontent.com/Alfonso099/APM-Master---Custom-Theme-Overlays/main/APM-Master-Custom-Theme-Overlays.user.js
+// @downloadURL  https://raw.githubusercontent.com/Alfonso099/APM-Master---Custom-Theme-Overlays/main/APM-Master-Custom-Theme-Overlays.user.js
+// @homepageURL  https://github.com/Alfonso099/APM-Master---Custom-Theme-Overlays
+// @supportURL   https://github.com/Alfonso099/APM-Master---Custom-Theme-Overlays/issues
 // ==/UserScript==
 
 /*
