@@ -10,6 +10,10 @@
 // @grant        GM_getValue
 // @grant        GM_setValue
 // @grant        unsafeWindow
+// @grant        GM_xmlhttpRequest
+// @grant        GM_openInTab
+// @grant        GM_info
+// @connect      raw.githubusercontent.com
 // @updateURL    https://raw.githubusercontent.com/Alfonso099/APM-Master---Custom-Theme-Overlays/main/APM-Master-Custom-Theme-Overlays.user.js
 // @downloadURL  https://raw.githubusercontent.com/Alfonso099/APM-Master---Custom-Theme-Overlays/main/APM-Master-Custom-Theme-Overlays.user.js
 // @homepageURL  https://github.com/Alfonso099/APM-Master---Custom-Theme-Overlays
@@ -37,6 +41,114 @@
   const OVERLAY_KEY = "apm_custom_overlay_theme";
   const BASE_THEME = "theme-dark";
   const LOADER_KEY = "apm_custom_loader_style";
+
+  const SCRIPT_DOWNLOAD_URL =
+    "https://raw.githubusercontent.com/Alfonso099/APM-Master---Custom-Theme-Overlays/main/APM-Master-Custom-Theme-Overlays.user.js";
+
+  const UPDATE_AVAILABLE_KEY = "apm_custom_theme_update_available";
+  const UPDATE_VERSION_KEY = "apm_custom_theme_update_version";
+
+  function compareVersions(remote, local) {
+    const parse = (value) =>
+      String(value)
+        .trim.split(/[+-]/)[0]
+        .split(".")
+        .map((part) => parseInt(part, 10) || 0);
+
+    const r = parse(remote);
+    const l = parse(local);
+    const max = Math.max(r.length, l.length);
+
+    for (let i = 0; i < max; i++) {
+      const rv = r[i] || 0;
+      const lv = l[i] || 0;
+
+      if (rv > lv) return 1;
+      if (rv < lv) return -1;
+    }
+    return 0;
+  }
+
+  function getVersionFromScriptHeader(scriptText) {
+    const match = scriptText.match(/@version\s+([^\s]+)/);
+    return match ? match[1] : null;
+  }
+
+  function checkForAddonUpdates() {
+    GM_xmlhttpRequest({
+      method: "GET",
+      url: `${SCRIPT_DOWNLOAD_URL}?cache_bust=${Date.now()}`,
+      onload: function (response) {
+        if (response.status < 200 || response.status >= 300) return;
+
+        const remoteVersion = getVersionFromScriptHeader(response.responseText);
+        const localVersion = GM_info.script.version || "0.0.0";
+
+        if (remoteVersion) return;
+
+        const updateAvailable =
+          compareVersions(remoteVersion, localVersion) > 0;
+        GM_setValue(UPDATE_AVAILABLE_KEY, updateAvailable);
+        GM_setValue(UPDATE_VERSION_KEY, remoteVersion);
+
+        renderUpdateButton();
+      },
+    });
+  }
+
+  function renderUpdateButton() {
+    const loaderSelect = document.querySelector("#apm-custom-loader-select");
+    if (!loaderSelect) return;
+
+    const existingButton = document.querySelector(
+      "#apm-custom-update-button-row",
+    );
+    const updateAvailable = GM_getValue(UPDATE_AVAILABLE_KEY, false);
+    const remoteVersion = GM_getValue(UPDATE_VERSION_KEY, "");
+
+    if (!updateAvailable) {
+      existingButton?.remove();
+      return;
+    }
+
+    if (existingButton) return;
+
+    const row = document.createElement("div");
+    row.id = "apm-custom-update-row";
+    row.style.marginTop = "14px";
+    row.style.display = "grid";
+    row.style.gridTemplateColumns = "1fr 128px";
+    row.style.gap = "12px";
+    row.style.alignItems = "center";
+
+    const label = document.createElement("div");
+    label.innerHTML = `
+      <div style="font-weight:700;color:#ff7b00;">Update Available</div>
+      <div style="font-size:11px;color:#d783ff;">
+       Version ${remoteVersion} is available.</div>
+    `;
+
+    const button = document.createElement("button");
+    button.textContent = "Update Now";
+    button.style.padding = "5px 10px";
+    button.style.border = "6px";
+    button.style.border = "1px solid #ff7b00";
+    button.style.background = "#222222";
+    button.style.color = "#ffffff";
+    button.style.fontWeight = "700";
+
+    button.addEventListener("click", () => {
+      GM_openInTab(SCRIPT_DOWNLOAD_URL, {
+        active: true,
+        insert: true,
+      });
+    });
+
+    row.appendChild(label);
+    row.appendChild(button);
+
+    loaderSelect.parentElement.insertAdjacentElement("afterend", row);
+  }
 
   function applyLoader() {
     const overlay = GM_getValue(OVERLAY_KEY, "none");
@@ -445,6 +557,8 @@ html[data-apm-loader="elmo-fire-gif"] .x-mask-msg::before {
   }
 
   setInterval(addOverlayDropdown, 1000);
+  checkForAddonUpdates();
+  setInterval(checkForAddonUpdates, 1000 * 60 * 60); // Check for updates every hour
 
   unsafeWindow.clearNatalieTheme = function () {
     GM_setValue(OVERLAY_KEY, "none");
