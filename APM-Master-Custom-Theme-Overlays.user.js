@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         APM Master - Custom Theme Overlays
 // @namespace    local.apm.theme-overlays
-// @version      1.0
+// @version      1.0.1
 // @description  Adds custom overlay themes to APM Master
 // @match        https://*.eam.hxgnsmartcloud.com/*
 // @match        https://*.eam.aws.a2z.com/*
@@ -275,12 +275,12 @@ html[data-apm-loader="pink-bolt"] .center-lightning {
 
 
 /* ============================
-   Loader Style: GIF Only
+   Loader Style: Pink Elmo GIF Only
    Completely replaces APM loader contents
    ============================ */
 
-html[data-apm-loader="gif"] #processing-request-container,
-html[data-apm-loader="gif"] .x-mask-msg {
+html[data-apm-loader="Pink Elmo gif"] #processing-request-container,
+html[data-apm-loader="Pink Elmo gif"] .x-mask-msg {
   background: transparent !important;
   border: none !important;
   box-shadow: none !important;
@@ -291,17 +291,17 @@ html[data-apm-loader="gif"] .x-mask-msg {
 }
 
 /* Hide everything APM puts inside the loader */
-html[data-apm-loader="gif"] #processing-request-container *,
-html[data-apm-loader="gif"] .x-mask-msg * {
+html[data-apm-loader="Pink Elmo gif"] #processing-request-container *,
+html[data-apm-loader="Pink Elmo gif"] .x-mask-msg * {
   display: none !important;
   visibility: hidden !important;
   opacity: 0 !important;
 }
 
 /* Hide APM thunder/bolt overlay too */
-html[data-apm-loader="gif"] .center-lightning,
-html[data-apm-loader="gif"] .thunder-overlay,
-html[data-apm-loader="gif"] .lightning-bolt {
+html[data-apm-loader="Pink Elmo gif"] .center-lightning,
+html[data-apm-loader="Pink Elmo gif"] .thunder-overlay,
+html[data-apm-loader="Pink Elmo gif"] .lightning-bolt {
   display: none !important;
   visibility: hidden !important;
   opacity: 0 !important;
@@ -309,14 +309,62 @@ html[data-apm-loader="gif"] .lightning-bolt {
 }
 
 /* Show only the GIF */
-html[data-apm-loader="gif"] #processing-request-container::before,
-html[data-apm-loader="gif"] .x-mask-msg::before {
+html[data-apm-loader="Pink Elmo gif"] #processing-request-container::before,
+html[data-apm-loader="Pink Elmo gif"] .x-mask-msg::before {
   content: "";
   display: block;
   width: 360px;
   height: 360px;
   margin: 0 auto;
   background-image: url("https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExeThsbGdhNmE1aWkydmNxa3Rta3JxaTV1YXJzZzA4dWpvcm9paWV2dyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/AglgRgRkHBR2R5Bh4R/giphy.gif");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+/* ============================
+   Loader Style: Elmo Fire GIF Only
+   Completely replaces APM loader contents
+   ============================ */
+
+html[data-apm-loader="Elmo Fire gif"] #processing-request-container,
+html[data-apm-loader="Elmo Fire gif"] .x-mask-msg {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  color: transparent !important;
+  font-size: 0 !important;
+  line-height: 0 !important;
+}
+
+/* Hide everything APM puts inside the loader */
+html[data-apm-loader="Elmo Fire gif"] #processing-request-container *,
+html[data-apm-loader="Elmo Fire gif"] .x-mask-msg * {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+}
+
+/* Hide APM thunder/bolt overlay too */
+html[data-apm-loader="Elmo Fire gif"] .center-lightning,
+html[data-apm-loader="Elmo Fire gif"] .thunder-overlay,
+html[data-apm-loader="Elmo Fire gif"] .lightning-bolt {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  animation: none !important;
+}
+
+/* Show only the GIF */
+html[data-apm-loader="Elmo Fire gif"] #processing-request-container::before,
+html[data-apm-loader="Elmo Fire gif"] .x-mask-msg::before {
+  content: "";
+  display: block;
+  width: 360px;
+  height: 360px;
+  margin: 0 auto;
+  background-image: url("https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExN3kzd3kzY2lobGdxaWFtMTk2cWMxMXJub3Nvdm9xODJwangxMndjbSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/Lopx9eUi34rbq/giphy.gif");
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
@@ -378,7 +426,8 @@ html[data-apm-loader="gif"] .x-mask-msg::before {
   <option value="theme-default">Theme Default</option>
   <option value="default">APM Default</option>
   <option value="pink-bolt">Pink Bolt</option>
-  <option value="gif">Pink Elmo GIF</option>
+  <option value="pink-elmo-gif">Pink Elmo GIF</option>
+  <option value="elmo-fire-gif">Elmo Fire GIF</option>
 `;
     loaderSelect.value = GM_getValue(LOADER_KEY, "theme-default");
 
