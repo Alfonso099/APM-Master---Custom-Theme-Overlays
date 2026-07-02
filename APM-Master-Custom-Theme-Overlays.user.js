@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         APM Master - Custom Theme Overlays
 // @namespace    local.apm.theme-overlays
-// @version      1.0.3
+// @version      1.0.4
 // @description  Adds custom overlay themes to APM Master
 // @match        https://*.eam.hxgnsmartcloud.com/*
 // @match        https://*.eam.aws.a2z.com/*
@@ -35,6 +35,9 @@
   - Loading Style selector
   - Pink Bolt loader
   - Pink Elmo GIF loader option
+  - Elmo Fire GIF loader option
+  - Update checker for new versions of this script
+  - Clear Natalie Theme button in console
 */
 
 (function () {
