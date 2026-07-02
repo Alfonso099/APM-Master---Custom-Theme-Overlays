@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         APM Master - Custom Theme Overlays
 // @namespace    local.apm.theme-overlays
-// @version      1.0.2
+// @version      1.0.3
 // @description  Adds custom overlay themes to APM Master
 // @match        https://*.eam.hxgnsmartcloud.com/*
 // @match        https://*.eam.aws.a2z.com/*
