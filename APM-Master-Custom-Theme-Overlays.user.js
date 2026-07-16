@@ -55,6 +55,9 @@
   const UPDATE_STATUS_KEY = "apm_custom_theme_update_status";
   const UPDATE_LAST_CHECK_KEY = "apm_custom_theme_update_last_check";
 
+  GM_setValue(UPDATE_AVAILABLE_KEY, false);
+  GM_setValue(UPDATE_STATUS_KEY, "Manual update check available.");
+
   function compareVersions(remote, local) {
     const parse = (value) =>
       String(value)
@@ -86,9 +89,12 @@
     GM_setValue(UPDATE_STATUS_KEY, message);
 
     const status = document.querySelector("#apm-custom-update-status");
-    const button = document.querySelector("#apm-custom-update-button-row");
+    const checkButton = document.querySelector(
+      "#apm-custom-check-update-button",
+    );
+    const updateButton = document.querySelector("#apm-custom-update-button");
 
-    if (!status) {
+    if (status) {
       status.textContent = message;
       status.style.color =
         type === "available"
@@ -100,9 +106,14 @@
               : "#d783ff";
     }
 
-    if (button) {
-      button.textContent = type === "available" ? "Update Now" : "Checking...";
-      button.dataset.updateAvailable = type === "available" ? "true" : "false";
+    if (checkButton) {
+      checkButton.textContent = type === "idle" ? "Checking..." : "Check";
+      checkButton.disabled = type === "idle";
+    }
+
+    if (updateButton) {
+      updateButton.style.display =
+        type === "available" ? "inline-block" : "none";
     }
   }
 
@@ -122,6 +133,7 @@
       url: `${SCRIPT_DOWNLOAD_URL}?cache_bust=${Date.now()}`,
       onload: function (response) {
         if (response.status < 200 || response.status >= 300) {
+          GM_setValue(UPDATE_AVAILABLE_KEY, false);
           setUpdateStatus(
             `Update check failed: HTTP ${response.status}`,
             "error",
@@ -133,6 +145,7 @@
         const localVersion = GM_info?.script?.version || "0.0.0";
 
         if (!remoteVersion) {
+          GM_setValue(UPDATE_AVAILABLE_KEY, false);
           setUpdateStatus("Could not read GitHub version.", "error");
           return;
         }
@@ -154,6 +167,7 @@
         }
       },
       onerror: function () {
+        GM_setValue(UPDATE_AVAILABLE_KEY, false);
         setUpdateStatus("Update check failed.", "error");
       },
     });
@@ -187,36 +201,50 @@
     </div>
   `;
 
-    const button = document.createElement("button");
-    button.id = "apm-custom-update-button";
-    button.textContent = GM_getValue(UPDATE_AVAILABLE_KEY, false)
-      ? "Update Now"
-      : "Check";
-    button.dataset.updateAvailable = GM_getValue(UPDATE_AVAILABLE_KEY, false)
-      ? "true"
-      : "false";
+    const buttonBox = document.createElement("div");
+    buttonBox.style.display = "flex";
+    buttonBox.style.gap = "6px";
+    buttonBox.style.justifyContent = "flex-end";
 
-    button.style.padding = "5px 10px";
-    button.style.borderRadius = "6px";
-    button.style.border = "1px solid #ff7b00";
-    button.style.background = "#222222";
-    button.style.color = "#ffffff";
-    button.style.fontWeight = "700";
-    button.style.cursor = "pointer";
+    const checkButton = document.createElement("button");
+    checkButton.id = "apm-custom-check-update-button";
+    checkButton.textContent = "Check";
 
-    button.addEventListener("click", () => {
-      if (button.dataset.updateAvailable === "true") {
-        openAddonUpdatePage();
-        return;
-      }
+    const updateButton = document.createElement("button");
+    updateButton.id = "apm-custom-update-button";
+    updateButton.textContent = "Update";
+    updateButton.style.display = "none";
 
+    [checkButton, updateButton].forEach((button) => {
+      button.style.padding = "5px 10px";
+      button.style.borderRadius = "6px";
+      button.style.border = "1px solid #ff7b00";
+      button.style.background = "#222222";
+      button.style.color = "#ffffff";
+      button.style.fontWeight = "700";
+      button.style.cursor = "pointer";
+    });
+
+    checkButton.addEventListener("click", () => {
       checkForAddonUpdates(true);
     });
 
+    updateButton.addEventListener("click", () => {
+      openAddonUpdatePage();
+    });
+
+    buttonBox.appendChild(checkButton);
+    buttonBox.appendChild(updateButton);
+
     row.appendChild(label);
-    row.appendChild(button);
+    row.appendChild(buttonBox);
 
     loaderSelect.closest("div").insertAdjacentElement("afterend", row);
+
+    const updateAvailable = GM_getValue(UPDATE_AVAILABLE_KEY, false);
+    if (updateAvailable) {
+      updateButton.style.display = "inline-block";
+    }
   }
 
   function applyLoader() {
